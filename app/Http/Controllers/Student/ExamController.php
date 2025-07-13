@@ -74,10 +74,10 @@ class StudentExamController extends Controller
             // If they land here and time is 0, the timer will immediately trigger submit.
         }
 
-        // Placeholder for questions
-        // $questions = $exam->questions()->get();
+        // Eager load questions and their options
+        $questions = $exam->questions()->with('options')->get();
 
-        return view('student.exams.take', compact('exam', 'attempt', 'initialSecondsRemaining' /*, 'questions'*/));
+        return view('student.exams.take', compact('exam', 'attempt', 'initialSecondsRemaining', 'questions'));
     }
 
     /**
@@ -96,19 +96,33 @@ class StudentExamController extends Controller
             return redirect()->route('student.exams.index')->with('error', 'No active attempt found for this exam or it has already been submitted.');
         }
 
-        // TODO: Validate the request (e.g., answers format from $request->input('answers')).
-        $answers = $request->input('answers', []); // Get answers, default to empty array
+        $answers = $request->input('answers', []);
 
-        // TODO: Save the actual answers to a related table (e.g., 'attempt_answers')
-        // For now, we'll just log them or store them in a serialized way if needed.
-        // $attempt->answers_data = json_encode($answers); // Example, not ideal for querying
+        // Dispatch one final job to save all answers upon submission
+        if (!empty($answers)) {
+            ProcessExamAutosave::dispatchSync($attempt->id, $answers); // Use dispatchSync for immediate processing
+        }
 
-        // TODO: Calculate score based on answers (this will be complex)
-        // $calculatedScore = 0; // Placeholder
-        // $attempt->score = $calculatedScore;
+        // Calculate score for multiple choice questions
+        $attempt->refresh(); // Refresh to get the newly saved answers
+        $score = 0;
+        $hasEssayQuestions = false;
 
+        foreach ($attempt->answers as $answer) {
+            if ($answer->question->type === 'multiple_choice') {
+                if ($answer->option && $answer->option->is_correct) {
+                    $score += $answer->question->points;
+                }
+            } elseif ($answer->question->type === 'essay') {
+                $hasEssayQuestions = true;
+            }
+        }
+
+        $attempt->score = $score;
         $attempt->end_time = Carbon::now();
-        $attempt->status = 'submitted'; // Or 'completed' if no further processing needed before grading
+        // If there are essay questions, status is 'submitted' for manual grading.
+        // Otherwise, it's 'graded'.
+        $attempt->status = $hasEssayQuestions ? 'submitted' : 'graded';
         $attempt->save();
 
         // Remove the onbeforeunload warning as the exam is now submitted

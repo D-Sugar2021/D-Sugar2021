@@ -34,23 +34,38 @@
                             <p class="text-sm text-yellow-600 dark:text-yellow-400">Please do not refresh the page during the exam. Your progress will be autosaved periodically.</p>
                         </div>
 
-                        <!-- Questions Area - Placeholder -->
+                        <!-- Questions Area -->
                         <div class="space-y-8">
-                            {{-- This is where questions will be looped and displayed --}}
-                            <div class="p-6 bg-yellow-50 dark:bg-gray-700 rounded-md text-center">
-                                <p class="font-semibold text-yellow-700 dark:text-yellow-300">Questions will be displayed here once the question module is implemented.</p>
-                                <p class="text-sm text-yellow-600 dark:text-yellow-400">For now, you can test the timer and submission flow.</p>
-                                <div class="mt-4">
-                                     <label for="sample_answer_1" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sample Input 1 (for testing autosave):</label>
-                                     <input type="text" name="answers[q1]" id="sample_answer_1" value="Answer for Q1"
-                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-900 dark:text-gray-200">
+                            @if($questions->count() > 0)
+                                @foreach($questions as $index => $question)
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg" id="question-{{ $question->id }}">
+                                    <div class="flex justify-between items-baseline">
+                                        <h4 class="font-semibold text-lg">{{ $index + 1 }}. {{ $question->question_text }}</h4>
+                                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">({{ $question->points }} point{{ $question->points > 1 ? 's' : '' }})</span>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        @if($question->type === 'multiple_choice')
+                                            <div class="space-y-3">
+                                                @foreach($question->options as $option)
+                                                <label class="flex items-center p-3 rounded-md border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                                    <input type="radio" name="answers[{{ $question->id }}]" value="{{ $option->id }}" class="form-radio h-5 w-5 text-indigo-600 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-indigo-500">
+                                                    <span class="ml-3 text-gray-700 dark:text-gray-300">{{ $option->option_text }}</span>
+                                                </label>
+                                                @endforeach
+                                            </div>
+                                        @elseif($question->type === 'essay')
+                                            <textarea name="answers[{{ $question->id }}]" rows="6" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-900 dark:text-gray-200" placeholder="Your answer..."></textarea>
+                                        @endif
+                                    </div>
                                 </div>
-                                <div class="mt-4">
-                                     <label for="sample_answer_2" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sample Input 2 (for testing autosave):</label>
-                                     <input type="text" name="answers[q2]" id="sample_answer_2" value="Answer for Q2"
-                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-900 dark:text-gray-200">
+                                @endforeach
+                            @else
+                                <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                                    <p class="text-lg font-medium">This exam currently has no questions.</p>
+                                    <p class="text-sm">Please contact your administrator.</p>
                                 </div>
-                            </div>
+                            @endif
                         </div>
                         <!-- End Questions Area -->
                     </div>

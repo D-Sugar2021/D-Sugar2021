@@ -38,9 +38,9 @@ class ResultController extends Controller
 
         // For now, we don't have detailed question-answer breakdown.
         // We can pass the attempt (which includes score and status) and the exam details.
-        // If answers_payload exists, we could potentially decode and pass it, but it's raw.
-        // $answers_data = $attempt->answers_payload ? json_decode($attempt->answers_payload, true) : null;
+        // Eager load the questions and the student's answers for this attempt.
+        $attempt->load(['exam.questions.options', 'answers.option']);
 
-        return view('student.results.show', compact('attempt' /*, 'answers_data'*/));
+        return view('student.results.show', compact('attempt'));
     }
 }

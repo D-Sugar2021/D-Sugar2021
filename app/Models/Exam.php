@@ -35,9 +35,11 @@ class Exam extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    // You might add methods here for questions, submissions, etc. later
-    // public function questions()
-    // {
-    //     return $this->hasMany(Question::class);
-    // }
+    /**
+     * Get all questions for the exam.
+     */
+    public function questions()
+    {
+        return $this->hasMany(Question::class);
+    }
 }

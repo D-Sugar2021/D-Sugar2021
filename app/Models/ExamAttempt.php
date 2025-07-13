@@ -48,11 +48,13 @@ class ExamAttempt extends Model
         return $this->belongsTo(Exam::class);
     }
 
-    // Later, you might add a relationship for stored answers
-    // public function answers()
-    // {
-    //     return $this->hasMany(AttemptAnswer::class); // Assuming an AttemptAnswer model
-    // }
+    /**
+     * Get all the answers for this attempt.
+     */
+    public function answers()
+    {
+        return $this->hasMany(AttemptAnswer::class);
+    }
 
     /**
      * Calculate remaining time in seconds.

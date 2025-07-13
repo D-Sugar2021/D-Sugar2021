@@ -3,6 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\ExamAttempt;
+use App\Models\AttemptAnswer;
+use App\Models\Question;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,9 +21,6 @@ class ProcessExamAutosave implements ShouldQueue
 
     /**
      * Create a new job instance.
-     *
-     * @param int $attemptId
-     * @param array $answers
      */
     public function __construct(int $attemptId, array $answers)
     {
@@ -35,27 +34,42 @@ class ProcessExamAutosave implements ShouldQueue
     public function handle(): void
     {
         $attempt = ExamAttempt::find($this->attemptId);
-
         if (!$attempt) {
             Log::warning("ProcessExamAutosave: ExamAttempt with ID {$this->attemptId} not found.");
             return;
         }
 
-        // In a full implementation, this is where you'd iterate through $this->answers
-        // and save them to a dedicated 'attempt_answers' table, linking them to $this->attemptId.
-        // For example:
-        // foreach ($this->answers as $questionId => $answerValue) {
-        //   AttemptAnswer::updateOrCreate(
-        //     ['exam_attempt_id' => $this->attemptId, 'question_id' => $questionId],
-        //     ['answer_value' => $answerValue] // Adjust 'answer_value' based on answer type
-        //   );
-        // }
+        foreach ($this->answers as $questionId => $answerValue) {
+            // The key from the form is `answers[question_id]`. We need to extract the ID.
+            if (preg_match('/\[(\d+)\]/', $questionId, $matches)) {
+                $qId = (int) $matches[1];
 
-        // For now, we'll store the raw payload in the new column.
-        // This is not ideal for querying individual answers but serves the autosave purpose for now.
-        $attempt->answers_payload = json_encode($this->answers);
-        $attempt->save();
+                $question = Question::find($qId);
+                if (!$question) {
+                    Log::warning("ProcessExamAutosave: Question with ID {$qId} not found for attempt {$this->attemptId}.");
+                    continue;
+                }
 
-        Log::info("ProcessExamAutosave: Successfully processed autosave for ExamAttempt ID {$this->attemptId}. Answers: ", $this->answers);
+                $dataToUpdate = [
+                    'exam_attempt_id' => $this->attemptId,
+                    'question_id' => $qId,
+                ];
+
+                if ($question->type === 'multiple_choice') {
+                    $dataToUpdate['option_id'] = (int) $answerValue;
+                    $dataToUpdate['answer_text'] = null; // Or you could store the option text here
+                } elseif ($question->type === 'essay') {
+                    $dataToUpdate['option_id'] = null;
+                    $dataToUpdate['answer_text'] = $answerValue;
+                }
+
+                AttemptAnswer::updateOrCreate(
+                    ['exam_attempt_id' => $this->attemptId, 'question_id' => $qId],
+                    $dataToUpdate
+                );
+            }
+        }
+
+        Log::info("ProcessExamAutosave: Successfully processed autosave for ExamAttempt ID {$this->attemptId}.");
     }
 }

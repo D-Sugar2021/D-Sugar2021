@@ -51,19 +51,60 @@
                     </div>
 
                     <div class="mt-8">
-                        <h4 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Attempt Details</h4>
-                        @if($attempt->answers_payload)
-                            <div class="prose dark:prose-invert max-w-none p-4 bg-gray-50 dark:bg-gray-700 rounded-md">
-                                <h5 class="font-semibold">Submitted Answers (Raw Data):</h5>
-                                <pre class="text-xs whitespace-pre-wrap break-all">{{ json_encode(json_decode($attempt->answers_payload), JSON_PRETTY_PRINT) }}</pre>
-                                <p class="text-xs italic mt-2">Note: This is a raw view of your saved answers. Detailed question-by-question feedback will be available if implemented by the instructor.</p>
-                            </div>
-                        @else
-                            <p class="text-gray-600 dark:text-gray-400">No detailed answer data available for this attempt, or answers were not saved in this format.</p>
-                        @endif
-                    </div>
+                        <h4 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Your Answers</h4>
+                        <div class="space-y-6">
+                            @php
+                                // Create a map of student's answers for easy lookup
+                                $studentAnswers = $attempt->answers->keyBy('question_id');
+                            @endphp
 
-                    {{-- Placeholder for future detailed feedback or question review --}}
+                            @foreach($attempt->exam->questions as $index => $question)
+                                <div class="p-4 border rounded-lg
+                                    @if(isset($studentAnswers[$question->id]))
+                                        @if($question->type === 'multiple_choice' && $studentAnswers[$question->id]->option && $studentAnswers[$question->id]->option->is_correct)
+                                            border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-800/20
+                                        @else
+                                            border-gray-200 dark:border-gray-700
+                                        @endif
+                                    @else
+                                        border-gray-200 dark:border-gray-700
+                                    @endif">
+                                    <p class="font-semibold text-lg text-gray-900 dark:text-gray-100">Q{{ $index + 1 }}: {{ $question->question_text }}</p>
+
+                                    @if($question->type === 'multiple_choice')
+                                        <div class="mt-4 pl-4 space-y-2">
+                                            @foreach($question->options as $option)
+                                                @php
+                                                    $studentAnswerOptionId = $studentAnswers[$question->id]->option_id ?? null;
+                                                    $isThisOptionChosen = $studentAnswerOptionId == $option->id;
+                                                @endphp
+                                                <div class="flex items-center">
+                                                    @if($option->is_correct)
+                                                        <span class="text-green-500 mr-2">&#10003;</span> <!-- Correct tick -->
+                                                    @elseif($isThisOptionChosen && !$option->is_correct)
+                                                         <span class="text-red-500 mr-2">&#10007;</span> <!-- Incorrect cross -->
+                                                    @else
+                                                        <span class="mr-2 text-gray-400">&ndash;</span>
+                                                    @endif
+                                                    <p class="{{ $isThisOptionChosen ? 'font-bold' : '' }} {{ $option->is_correct ? 'text-green-700 dark:text-green-400' : ($isThisOptionChosen ? 'text-red-700 dark:text-red-400' : 'text-gray-700 dark:text-gray-300') }}">
+                                                        {{ $option->option_text }}
+                                                    </p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        @if(!isset($studentAnswers[$question->id]))
+                                            <p class="mt-3 text-sm text-yellow-600 dark:text-yellow-500">Not Answered</p>
+                                        @endif
+                                    @elseif($question->type === 'essay')
+                                        <div class="mt-3 prose dark:prose-invert max-w-none p-3 bg-gray-50 dark:bg-gray-900/50 rounded-md">
+                                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">Your Answer:</p>
+                                            <p>{{ $studentAnswers[$question->id]->answer_text ?? 'Not Answered' }}</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                     <div class="mt-10 border-t border-gray-200 dark:border-gray-700 pt-6">
                          <h4 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Feedback</h4>
                          <p class="text-gray-600 dark:text-gray-400">

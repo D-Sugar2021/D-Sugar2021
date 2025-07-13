@@ -40,6 +40,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Exam CRUD routes
     Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
+    // Nested Question CRUD routes
+    Route::resource('exams.questions', \App\Http\Controllers\Admin\QuestionController::class)->except(['show'])->shallow();
 });
 
 // Student routes
