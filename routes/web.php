@@ -70,3 +70,8 @@ Route::middleware('auth')->group(function () {
         return response("Profile Page Placeholder. User: " . auth()->user()->name);
     })->name('profile.edit');
 });
+
+// Temporary Style Test Route
+Route::get('/style-test', function() {
+    return view('style-test');
+});
