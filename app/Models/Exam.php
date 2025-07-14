@@ -42,4 +42,12 @@ class Exam extends Model
     {
         return $this->hasMany(Question::class);
     }
+
+    /**
+     * The students that are allocated to this exam.
+     */
+    public function allocatedStudents()
+    {
+        return $this->belongsToMany(User::class, 'exam_user', 'exam_id', 'user_id');
+    }
 }

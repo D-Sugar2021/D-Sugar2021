@@ -20,9 +20,12 @@ class StudentExamController extends Controller
      */
     public function index()
     {
-        $availableExams = Exam::where('status', 'published')
+        $user = Auth::user();
+        // Get exams that are published AND allocated to this student
+        $availableExams = $user->allocatedExams()
+                                ->where('status', 'published')
                                 ->orderBy('title')
-                                ->paginate(10); // Paginate if list can be long
+                                ->paginate(10);
 
         return view('student.exams.index', compact('availableExams'));
     }
@@ -33,12 +36,15 @@ class StudentExamController extends Controller
      */
     public function show(Exam $exam)
     {
-        // Ensure the exam is published
-        if ($exam->status !== 'published') {
-            return redirect()->route('student.exams.index')->with('error', 'This exam is not currently available.');
+        $user = Auth::user();
+
+        // Ensure the exam is published AND allocated to the student
+        $isAllocated = $user->allocatedExams()->where('exam_id', $exam->id)->exists();
+
+        if ($exam->status !== 'published' || !$isAllocated) {
+            return redirect()->route('student.exams.index')->with('error', 'This exam is not currently available for you.');
         }
 
-        $user = Auth::user();
         $now = Carbon::now();
 
         // Find existing attempt or create a new one

@@ -98,21 +98,27 @@ class ExamControllerTest extends TestCase
     }
 
     /** @test */
-    public function admin_can_update_an_exam()
+    public function admin_can_update_an_exam_and_allocate_students()
     {
-        $exam = Exam::factory()->recycle($this->adminUser)->create(['title' => 'Old Title']);
+        $exam = Exam::factory()->recycle($this->adminUser)->create();
+        $students = User::factory()->count(3)->create();
+        $studentIds = $students->pluck('id')->toArray();
+
         $updateData = [
             'title' => 'Updated Exam Title',
             'description' => $exam->description,
             'duration' => $exam->duration,
-            'status' => 'draft',
+            'status' => 'published',
+            'students' => $studentIds,
         ];
 
         $response = $this->actingAs($this->adminUser)->put(route('admin.exams.update', $exam), $updateData);
 
         $response->assertRedirect(route('admin.exams.index'));
         $response->assertSessionHas('success', 'Exam updated successfully.');
-        $this->assertDatabaseHas('exams', ['id' => $exam->id, 'title' => 'Updated Exam Title', 'status' => 'draft']);
+        $this->assertDatabaseHas('exams', ['id' => $exam->id, 'title' => 'Updated Exam Title']);
+        $this->assertCount(3, $exam->refresh()->allocatedStudents);
+        $this->assertEquals($studentIds, $exam->allocatedStudents->pluck('id')->toArray());
     }
 
     /** @test */

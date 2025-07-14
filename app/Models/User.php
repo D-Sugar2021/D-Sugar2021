@@ -19,9 +19,10 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
-        'role', // Added role here
+        'role',
     ];
 
     /**
@@ -73,5 +74,13 @@ class User extends Authenticatable
     public function isStudent(): bool
     {
         return $this->hasRole('student');
+    }
+
+    /**
+     * The exams that are allocated to the student.
+     */
+    public function allocatedExams()
+    {
+        return $this->belongsToMany(Exam::class, 'exam_user', 'user_id', 'exam_id');
     }
 }

@@ -51,10 +51,25 @@ class AuthenticatedSessionControllerTest extends TestCase
     }
 
     /** @test */
-    public function student_user_is_redirected_to_student_dashboard_after_login()
+    public function student_can_login_with_email()
     {
-        $response = $this->post('/login', [
-            'email' => $this->studentUser->email,
+        $response = $this->post(route('login'), [
+            'login' => $this->studentUser->email,
+            'password' => 'password123',
+        ]);
+
+        $this->assertAuthenticatedAs($this->studentUser);
+        $response->assertRedirect(route('student.dashboard'));
+    }
+
+    /** @test */
+    public function student_can_login_with_username()
+    {
+        // Ensure the student has a username to test with
+        $this->studentUser->update(['username' => 'testuser']);
+
+        $response = $this->post(route('login'), [
+            'login' => 'testuser',
             'password' => 'password123',
         ]);
 

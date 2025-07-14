@@ -65,12 +65,10 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
 // Include auth routes (login, logout, register etc.)
 require __DIR__.'/auth.php';
 
-// Placeholder for profile routes (used in app.blade.php)
+// Profile and Password Update Routes
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', function() {
-        // Dummy view for profile, actual implementation would use a controller
-        return response("Profile Page Placeholder. User: " . auth()->user()->name);
-    })->name('profile.edit');
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password.update');
 });
 
 // Temporary Style Test Route

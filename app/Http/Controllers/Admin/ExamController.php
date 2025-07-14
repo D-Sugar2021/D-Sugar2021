@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
+use App\Models\User; // Import User model
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -66,7 +67,9 @@ class ExamController extends Controller
      */
     public function edit(Exam $exam)
     {
-        return view('admin.exams.edit', compact('exam'));
+        $students = User::where('role', 'student')->orderBy('name')->get();
+        $exam->load('allocatedStudents'); // Eager load currently allocated students
+        return view('admin.exams.edit', compact('exam', 'students'));
     }
 
     /**
@@ -79,14 +82,19 @@ class ExamController extends Controller
             'description' => 'nullable|string',
             'duration' => 'required|integer|min:1',
             'status' => ['required', Rule::in(['draft', 'published', 'archived'])],
+            'students' => 'nullable|array', // Validate that students is an array if present
+            'students.*' => 'exists:users,id', // Validate that each student ID exists in the users table
         ]);
 
-        $exam->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'duration' => $request->duration,
-            'status' => $request->status,
-        ]);
+        $exam->update($request->only(['title', 'description', 'duration', 'status']));
+
+        // Sync the allocated students
+        if ($request->has('students')) {
+            $exam->allocatedStudents()->sync($request->input('students', []));
+        } else {
+            // If no students are selected, detach all
+            $exam->allocatedStudents()->sync([]);
+        }
 
         return redirect()->route('admin.exams.index')->with('success', 'Exam updated successfully.');
     }
