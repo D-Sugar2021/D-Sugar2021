@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" office:version="1.2">
+  <office:body>
+    <office:forms>
+      <form:form form:name="ExamForm" form:command-type="table" form:command="student_exams">
+        <form:control form:id="TimerLabel" form:control-implementation="com.sun.star.form.component.FixedText">
+            <form:properties>
+                <form:property form:name="Label" form:value="01:00:00" />
+            </form:properties>
+        </form:control>
+        </form:form>
+    </office:forms>
+  </office:body>
+</office:document-content>

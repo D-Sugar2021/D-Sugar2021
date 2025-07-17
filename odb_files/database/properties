@@ -1,0 +1,8 @@
+#HSQL Database Engine
+#Fri Jul 18 00:00:00 UTC 2025
+hsqldb.script_format=0
+hsqldb.sql.pad_space=false
+hsqldb.version=1.8.0
+runtime.gc_interval=0
+sql.enforce_strict_size=true
+shutdown=true

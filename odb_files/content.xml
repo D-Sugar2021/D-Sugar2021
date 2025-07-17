@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:db="urn:oasis:names:tc:opendocument:xmlns:database:1.0">
+  <office:body>
+    <office:database>
+      <db:data-source>
+        <db:connection-data>
+          <db:connection-resource db:href="hsqldb:file:database/examdb"/>
+        </db:connection-data>
+      </db:data-source>
+    </office:database>
+  </office:body>
+</office:document-content>
