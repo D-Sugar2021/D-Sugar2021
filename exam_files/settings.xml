@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document-settings office:version="1.2" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0">
+    <office:settings>
+        <config:config-item-set config:name="ooo:view-settings">
+            <config:config-item config:name="ViewLeft" config:type="int">0</config:config-item>
+            <config:config-item config:name="ViewTop" config:type="int">0</config:config-item>
+            <config:config-item config:name="ViewWidth" config:type="int">1024</config:config-item>
+            <config:config-item config:name="ViewHeight" config:type="int">768</config:config-item>
+        </config:config-item-set>
+    </office:settings>
+</office:document-settings>
