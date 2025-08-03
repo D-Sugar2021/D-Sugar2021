@@ -3,8 +3,12 @@ import axios from 'axios';
 const API_URL = '/api/products/';
 
 // Get all products
-const getProducts = () => {
-  return axios.get(API_URL);
+const getProducts = (filter) => {
+  let url = API_URL;
+  if (filter && filter !== 'all') {
+    url += `?type=${filter}`;
+  }
+  return axios.get(url);
 };
 
 // Get product by ID

@@ -1,7 +1,25 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 import { ProductContext } from '../context/ProductContext';
 import { CartContext } from '../context/CartContext';
+import {
+  Container,
+  Grid,
+  Typography,
+  Box,
+  Rating,
+  Card,
+  CardContent,
+  Button,
+  CircularProgress,
+  Alert,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Divider,
+  Link,
+} from '@mui/material';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -12,6 +30,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     getProductById(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const addToCartHandler = () => {
@@ -20,89 +39,89 @@ const ProductDetail = () => {
   };
 
   return (
-    <div>
-      <Link to="/" className="btn btn-light my-3">
+    <Container>
+      <Link component={RouterLink} to="/" sx={{ mb: 4, display: 'inline-block' }}>
         Go Back
       </Link>
       {loading ? (
-        <h2>Loading...</h2>
+        <CircularProgress />
       ) : error ? (
-        <h3>{error}</h3>
+        <Alert severity="error">{error}</Alert>
       ) : (
         product && (
-          <div className="row">
-            <div className="col-md-6">
-              <img src={product.image} alt={product.name} className="img-fluid" />
-            </div>
-            <div className="col-md-3">
-              <ul className="list-group list-group-flush">
-                <li className="list-group-item">
-                  <h3>{product.name}</h3>
-                </li>
-                <li className="list-group-item">
-                  {product.rating} from {product.numReviews} reviews
-                </li>
-                <li className="list-group-item">Price: ${product.price}</li>
-                <li className="list-group-item">
-                  Description: {product.description}
-                </li>
-              </ul>
-            </div>
-            <div className="col-md-3">
-              <div className="card">
-                <ul className="list-group list-group-flush">
-                  <li className="list-group-item">
-                    <div className="row">
-                      <div className="col">Price:</div>
-                      <div className="col">
-                        <strong>${product.price}</strong>
-                      </div>
-                    </div>
-                  </li>
-                  <li className="list-group-item">
-                    <div className="row">
-                      <div className="col">Status:</div>
-                      <div className="col">
-                        {product.countInStock > 0 ? 'In Stock' : 'Out Of Stock'}
-                      </div>
-                    </div>
-                  </li>
-                  {product.countInStock > 0 && (
-                    <li className="list-group-item">
-                      <div className="row">
-                        <div className="col">Qty</div>
-                        <div className="col">
-                          <select
-                            value={qty}
-                            onChange={(e) => setQty(Number(e.target.value))}
-                          >
-                            {[...Array(product.countInStock).keys()].map((x) => (
-                              <option key={x + 1} value={x + 1}>
-                                {x + 1}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    </li>
-                  )}
-                  <li className="list-group-item">
-                    <button
-                      onClick={addToCartHandler}
-                      className="btn btn-primary btn-block"
-                      type="button"
-                      disabled={product.countInStock === 0}
-                    >
-                      Add To Cart
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <Grid container spacing={4}>
+            <Grid item md={6}>
+              <img src={product.image} alt={product.name} style={{ width: '100%' }} />
+            </Grid>
+            <Grid item md={6}>
+                <Typography component="h1" variant="h3" gutterBottom>
+                  {product.name}
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Rating value={product.rating} readOnly precision={0.5} />
+                    <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                    ({product.numReviews} reviews)
+                    </Typography>
+                </Box>
+                <Typography variant="h5" sx={{ mb: 2 }}>
+                    Price: ${product.price}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                    Description: {product.description}
+                </Typography>
+                <Card>
+                    <CardContent>
+                        <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                                <Typography>Price:</Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Typography><strong>${product.price}</strong></Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Typography>Status:</Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Typography>
+                                    {product.countInStock > 0 ? 'In Stock' : 'Out Of Stock'}
+                                </Typography>
+                            </Grid>
+                            {product.countInStock > 0 && (
+                                <Grid item xs={6}>
+                                    <Typography>Qty:</Typography>
+                                    <FormControl fullWidth>
+                                        <Select
+                                            value={qty}
+                                            onChange={(e) => setQty(Number(e.target.value))}
+                                        >
+                                            {[...Array(product.countInStock).keys()].map((x) => (
+                                            <MenuItem key={x + 1} value={x + 1}>
+                                                {x + 1}
+                                            </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                            )}
+                            <Grid item xs={12}>
+                                <Button
+                                    onClick={addToCartHandler}
+                                    variant="contained"
+                                    fullWidth
+                                    disabled={product.countInStock === 0}
+                                >
+                                    Add To Cart
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </CardContent>
+                </Card>
+            </Grid>
+          </Grid>
         )
       )}
-    </div>
+    </Container>
   );
 };
 

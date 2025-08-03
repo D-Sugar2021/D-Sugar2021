@@ -20,7 +20,12 @@ const isAdmin = (req, res, next) => {
 // @desc    Get all products
 // @access  Public
 router.get('/', (req, res) => {
-  Product.find()
+  const filter = {};
+  if (req.query.type) {
+    filter.type = req.query.type;
+  }
+
+  Product.find(filter)
     .sort({ date: -1 })
     .then(products => res.json(products))
     .catch(err => res.status(404).json({ noproductsfound: 'No products found' }));

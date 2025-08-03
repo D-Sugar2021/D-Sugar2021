@@ -7,6 +7,7 @@ const initialState = {
   product: null,
   loading: true,
   error: null,
+  filter: 'all', // 'all', 'good', 'service'
 };
 
 // Create context
@@ -27,6 +28,12 @@ const productReducer = (state, action) => {
         product: action.payload,
         loading: false,
       };
+    case 'SET_FILTER':
+        return {
+            ...state,
+            filter: action.payload,
+            loading: true, // Set loading to true when filter changes
+        };
     case 'PRODUCT_ERROR':
       return {
         ...state,
@@ -43,9 +50,9 @@ export const ProductProvider = ({ children }) => {
   const [state, dispatch] = useReducer(productReducer, initialState);
 
   // Actions
-  const getProducts = async () => {
+  const getProducts = async (filter) => {
     try {
-      const res = await productService.getProducts();
+      const res = await productService.getProducts(filter);
       dispatch({
         type: 'GET_PRODUCTS_SUCCESS',
         payload: res.data,
@@ -73,6 +80,10 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
+  const setFilter = (filter) => {
+      dispatch({ type: 'SET_FILTER', payload: filter });
+  }
+
   // You can add create, update, delete actions here later
 
   return (
@@ -81,6 +92,7 @@ export const ProductProvider = ({ children }) => {
         ...state,
         getProducts,
         getProductById,
+        setFilter,
       }}
     >
       {children}

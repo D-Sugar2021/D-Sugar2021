@@ -28,6 +28,12 @@ const ProductSchema = new Schema(
       type: String,
       required: true,
     },
+    type: {
+      type: String,
+      required: true,
+      enum: ['good', 'service'],
+      default: 'good',
+    },
     image: {
       type: String,
       required: true,

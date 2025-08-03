@@ -1,59 +1,74 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
+import { ProductContext } from '../context/ProductContext';
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Button,
+    Box,
+    IconButton,
+    Badge,
+    ButtonGroup
+} from '@mui/material';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 const Navbar = () => {
   const { isAuthenticated, logout, user } = useContext(AuthContext);
   const { cartItems } = useContext(CartContext);
+  const { filter, setFilter } = useContext(ProductContext);
+  const navigate = useNavigate();
 
-  const authLinks = (
-    <ul>
-      <li>
-        <Link to="/cart">
-          <i className="fas fa-shopping-cart"></i> Cart{' '}
-          {cartItems.length > 0 && (
-            <span className="badge">{cartItems.reduce((acc, item) => acc + item.qty, 0)}</span>
-          )}
-        </Link>
-      </li>
-      <li>
-        <span>Hello, {user && user.name}</span>
-      </li>
-      <li>
-        <a onClick={logout} href="#!">
-          Logout
-        </a>
-      </li>
-    </ul>
-  );
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
-  const guestLinks = (
-    <ul>
-      <li>
-        <Link to="/cart">
-          <i className="fas fa-shopping-cart"></i> Cart{' '}
-          {cartItems.length > 0 && (
-            <span className="badge">{cartItems.reduce((acc, item) => acc + item.qty, 0)}</span>
-          )}
-        </Link>
-      </li>
-      <li>
-        <Link to="/register">Register</Link>
-      </li>
-      <li>
-        <Link to="/login">Login</Link>
-      </li>
-    </ul>
-  );
+  const cartItemCount = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
   return (
-    <nav>
-      <h1>
-        <Link to="/">MERN E-Commerce</Link>
-      </h1>
-      {isAuthenticated ? authLinks : guestLinks}
-    </nav>
+    <AppBar position="static" color="default" elevation={0} sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}>
+      <Toolbar sx={{ flexWrap: 'wrap' }}>
+        <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1, textDecoration: 'none' }} component={RouterLink} to="/">
+          MugenCommerce
+        </Typography>
+
+        <ButtonGroup variant="text" aria-label="text button group" sx={{ mr: 3 }}>
+            <Button onClick={() => setFilter('all')} disabled={filter === 'all'}>All</Button>
+            <Button onClick={() => setFilter('good')} disabled={filter === 'good'}>Goods</Button>
+            <Button onClick={() => setFilter('service')} disabled={filter === 'service'}>Services</Button>
+        </ButtonGroup>
+
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton component={RouterLink} to="/cart" color="inherit" sx={{ mr: 2 }}>
+            <Badge badgeContent={cartItemCount} color="secondary">
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
+          {isAuthenticated ? (
+            <>
+              <Typography sx={{ mr: 2 }}>
+                Hello, {user && user.name}
+              </Typography>
+              <Button onClick={handleLogout} variant="outlined">
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button component={RouterLink} to="/login" sx={{ my: 1, mx: 1.5 }}>
+                Login
+              </Button>
+              <Button component={RouterLink} to="/register" variant="contained">
+                Sign Up
+              </Button>
+            </>
+          )}
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

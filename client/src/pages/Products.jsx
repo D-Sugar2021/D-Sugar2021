@@ -1,31 +1,35 @@
 import React, { useContext, useEffect } from 'react';
 import { ProductContext } from '../context/ProductContext';
 import Product from '../components/Product';
+import { Grid, Typography, CircularProgress, Alert } from '@mui/material';
 
 const Products = () => {
-  const { products, loading, error, getProducts } = useContext(ProductContext);
+  const { products, loading, error, getProducts, filter } = useContext(ProductContext);
 
   useEffect(() => {
-    getProducts();
-  }, []);
+    getProducts(filter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   return (
-    <div>
-      <h1>Latest Products</h1>
+    <>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Latest Products
+      </Typography>
       {loading ? (
-        <h2>Loading...</h2>
+        <CircularProgress />
       ) : error ? (
-        <h3>{error}</h3>
+        <Alert severity="error">{error}</Alert>
       ) : (
-        <div className="row">
-          {products.map(product => (
-            <div key={product._id} className="col-sm-12 col-md-6 col-lg-4 col-xl-3">
+        <Grid container spacing={4}>
+          {products.map((product) => (
+            <Grid item key={product._id} xs={12} sm={6} md={4} lg={3}>
               <Product product={product} />
-            </div>
+            </Grid>
           ))}
-        </div>
+        </Grid>
       )}
-    </div>
+    </>
   );
 };
 

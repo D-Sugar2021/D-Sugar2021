@@ -1,6 +1,27 @@
 import React, { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import {
+  Container,
+  Grid,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  Link,
+  Alert
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Cart = () => {
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
@@ -15,81 +36,76 @@ const Cart = () => {
   };
 
   return (
-    <div className="row">
-      <div className="col-md-8">
-        <h1>Shopping Cart</h1>
-        {cartItems.length === 0 ? (
-          <div>
-            Your cart is empty <Link to="/">Go Back</Link>
-          </div>
-        ) : (
-          <ul className="list-group list-group-flush">
-            {cartItems.map((item) => (
-              <li key={item.product} className="list-group-item">
-                <div className="row">
-                  <div className="col-md-2">
-                    <img src={item.image} alt={item.name} className="img-fluid rounded" />
-                  </div>
-                  <div className="col-md-3">
-                    <Link to={`/product/${item.product}`}>{item.name}</Link>
-                  </div>
-                  <div className="col-md-2">${item.price}</div>
-                  <div className="col-md-2">
-                    <select
+    <Container>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Shopping Cart
+      </Typography>
+      <Grid container spacing={4}>
+        <Grid item md={8}>
+          {cartItems.length === 0 ? (
+            <Alert severity="info">
+              Your cart is empty. <Link component={RouterLink} to="/">Go Back</Link>
+            </Alert>
+          ) : (
+            <List>
+              {cartItems.map((item) => (
+                <ListItem key={item.product} divider>
+                  <ListItemAvatar>
+                    <Avatar src={item.image} alt={item.name} variant="square" />
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={<Link component={RouterLink} to={`/product/${item.product}`}>{item.name}</Link>}
+                    secondary={`$${item.price}`}
+                  />
+                  <FormControl sx={{ m: 1, minWidth: 70 }}>
+                    <Select
                       value={item.qty}
                       onChange={(e) =>
-                        addToCart(item, Number(e.target.value))
+                        addToCart({ ...item, product: { _id: item.product, name: item.name, image: item.image, price: item.price, countInStock: item.countInStock } }, Number(e.target.value))
                       }
                     >
                       {[...Array(item.countInStock).keys()].map((x) => (
-                        <option key={x + 1} value={x + 1}>
+                        <MenuItem key={x + 1} value={x + 1}>
                           {x + 1}
-                        </option>
+                        </MenuItem>
                       ))}
-                    </select>
-                  </div>
-                  <div className="col-md-2">
-                    <button
-                      type="button"
-                      className="btn btn-light"
-                      onClick={() => removeFromCartHandler(item.product)}
-                    >
-                      <i className="fas fa-trash"></i>
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <div className="col-md-4">
-        <div className="card">
-          <ul className="list-group list-group-flush">
-            <li className="list-group-item">
-              <h2>
-                Subtotal ({cartItems.reduce((acc, item) => acc + item.qty, 0)})
-                items
-              </h2>
-              $
-              {cartItems
-                .reduce((acc, item) => acc + item.qty * item.price, 0)
-                .toFixed(2)}
-            </li>
-            <li className="list-group-item">
-              <button
+                    </Select>
+                  </FormControl>
+                  <IconButton edge="end" aria-label="delete" onClick={() => removeFromCartHandler(item.product)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Grid>
+        <Grid item md={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h5" component="div" gutterBottom>
+                Subtotal ({cartItems.reduce((acc, item) => acc + item.qty, 0)}) items
+              </Typography>
+              <Typography variant="h6">
+                $
+                {cartItems
+                  .reduce((acc, item) => acc + item.qty * item.price, 0)
+                  .toFixed(2)}
+              </Typography>
+              <Button
                 type="button"
-                className="btn btn-primary btn-block"
+                variant="contained"
+                fullWidth
                 disabled={cartItems.length === 0}
                 onClick={checkoutHandler}
+                sx={{ mt: 2 }}
               >
                 Proceed To Checkout
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Container>
   );
 };
 
