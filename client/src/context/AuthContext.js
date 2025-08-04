@@ -50,12 +50,17 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-        const decodedToken = jwt_decode(token);
-        // Check if token is expired
-        if (decodedToken.exp * 1000 < Date.now()) {
+        try {
+            const decodedToken = jwt_decode(token);
+            // Check if token is expired
+            if (decodedToken.exp * 1000 < Date.now()) {
+                dispatch({ type: 'LOGOUT' });
+            } else {
+                dispatch({ type: 'LOGIN_SUCCESS', payload: { token } });
+            }
+        } catch (error) {
+            // If token is invalid, logout
             dispatch({ type: 'LOGOUT' });
-        } else {
-            dispatch({ type: 'LOGIN_SUCCESS', payload: { token } });
         }
     }
   }, []);

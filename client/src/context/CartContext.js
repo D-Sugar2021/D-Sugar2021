@@ -67,7 +67,7 @@ export const CartProvider = ({ children }) => {
   };
 
   // Persist cart to local storage
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(state.cartItems));
   }, [state.cartItems]);
 
